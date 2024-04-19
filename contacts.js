@@ -4,19 +4,13 @@ import crypto from "node:crypto";
 
 const contactsPath = path.resolve("db", "contacts.json");
 
-async function readContacts() {
+async function listContacts() {
   const contacts = await fs.readFile(contactsPath, { encoding: "utf-8" });
   return JSON.parse(contacts);
 }
 
-async function listContacts() {
-  const contacts = await readContacts();
-  return contacts;
-}
-listContacts().catch((error) => console.error(error));
-
 async function getContactById(contactId) {
-  const contacts = await readContacts();
+  const contacts = await listContacts();
   const contact = contacts.find((contact) => contact.id === contactId);
 
   if (typeof contact === "undefined") {
@@ -24,10 +18,9 @@ async function getContactById(contactId) {
   }
   return contact;
 }
-getContactById().catch((error) => console.error(error));
 
 async function removeContact(contactId) {
-  const allContacts = await readContacts();
+  const allContacts = await listContacts();
   const removeIndex = allContacts.findIndex(
     (contact) => contact.id === contactId
   );
@@ -38,16 +31,13 @@ async function removeContact(contactId) {
   await fs.writeFile(contactsPath, JSON.stringify(allContacts, null, 2));
   return res;
 }
-removeContact().catch((error) => console.error(error));
 
 async function addContact(name, email, phone) {
-  const contacts = await readContacts();
+  const contacts = await listContacts();
   const newContact = { id: crypto.randomUUID(), name, email, phone };
   contacts.push(newContact);
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
   return newContact;
 }
-
-addContact().catch((error) => console.error(error));
 
 export default { listContacts, getContactById, removeContact, addContact };
